@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('NetBilling Pro')
             ->font('Inter')
-            ->darkMode(true, isForced: true)
+            ->darkMode()
             ->sidebarCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Purple,
@@ -51,8 +51,16 @@ class AdminPanelProvider extends PanelProvider
                     ->collapsed(),
             ])
             ->renderHook(
-                'panels::head.done',
+                'panels::body.start',
                 fn () => view('filament.hooks.custom-styles'),
+            )
+            ->renderHook(
+                'panels::global-search.after',
+                fn () => view('filament.hooks.topbar-stats'),
+            )
+            ->renderHook(
+                'panels::sidebar.footer',
+                fn () => view('filament.hooks/sidebar-footer'),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

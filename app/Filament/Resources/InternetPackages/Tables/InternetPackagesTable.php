@@ -25,7 +25,7 @@ class InternetPackagesTable
                     ->searchable(),
                 \Filament\Tables\Columns\TextColumn::make('price')
                     ->label('Harga / Bulan')
-                    ->money('idr')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('customers_count')
                     ->counts('customers')

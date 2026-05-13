@@ -29,13 +29,19 @@ class RecentPaymentsWidget extends TableWidget
                     ->searchable()
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('amount_paid')
-                    ->money('idr')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->label('Jumlah'),
                 \Filament\Tables\Columns\TextColumn::make('payment_date')
                     ->date()
                     ->label('Tanggal'),
                 \Filament\Tables\Columns\TextColumn::make('payment_method')
                     ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'cash' => 'success',
+                        'transfer' => 'info',
+                        'qris' => 'warning', // warning is usually orange/amber, let's use a custom color if possible or just stick to filament defaults
+                        default => 'gray',
+                    })
                     ->label('Metode'),
             ])
             ->paginated(false);

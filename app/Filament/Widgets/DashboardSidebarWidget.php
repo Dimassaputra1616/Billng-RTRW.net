@@ -11,7 +11,7 @@ class DashboardSidebarWidget extends Widget
     protected string $view = 'filament.widgets.dashboard-sidebar-v2';
     
     protected int | string | array $columnSpan = [
-        'md' => 1,
-        'xl' => 1,
+        'md' => 2,
+        'xl' => 2,
     ];
 }

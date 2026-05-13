@@ -36,7 +36,7 @@ class InvoicesTable
                     }),
                 \Filament\Tables\Columns\TextColumn::make('amount')
                     ->label('Tagihan')
-                    ->money('idr')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('status')
                     ->label('Status')

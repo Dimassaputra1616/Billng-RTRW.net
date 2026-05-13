@@ -41,7 +41,7 @@ class PaymentsTable
                     }),
                 \Filament\Tables\Columns\TextColumn::make('amount_paid')
                     ->label('Jumlah Bayar')
-                    ->money('idr')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->sortable(),
                 \Filament\Tables\Columns\TextColumn::make('payment_date')
                     ->label('Tanggal Bayar')

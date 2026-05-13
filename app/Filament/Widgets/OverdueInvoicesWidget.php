@@ -28,7 +28,7 @@ class OverdueInvoicesWidget extends TableWidget
                 \Filament\Tables\Columns\TextColumn::make('customer.internetPackage.name')
                     ->label('Paket'),
                 \Filament\Tables\Columns\TextColumn::make('amount')
-                    ->money('idr')
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'))
                     ->label('Tagihan'),
                 \Filament\Tables\Columns\TextColumn::make('due_date')
                     ->date()
@@ -59,6 +59,8 @@ class OverdueInvoicesWidget extends TableWidget
                             ->success()
                             ->send();
                     }),
-            ]);
+            ])
+            ->emptyStateIcon('heroicon-o-check-circle')
+            ->emptyStateHeading('Mantap! Tidak ada pelanggan yang menunggak.');
     }
 }

@@ -118,17 +118,17 @@ class CustomersTable
                         if ($invoice) {
                             $amount = number_format($invoice->amount, 0, ',', '.');
                             $dueDate = $invoice->due_date->format('d M Y');
-                            $message = "🚀 *VeloNet Billing* \n\n" .
+                            $message = "*VeloNet Billing* \n\n" .
                                 "Halo Bapak/Ibu *{$record->name}*,\n" .
                                 "Kami informasikan bahwa tagihan internet Anda untuk periode ini sudah terbit.\n\n" .
-                                "📌 *Detail Tagihan:*\n" .
+                                "*Detail Tagihan:*\n" .
                                 "- Nomor: #{$invoice->invoice_number}\n" .
                                 "- Total: *Rp {$amount}*\n" .
                                 "- Jatuh Tempo: *{$dueDate}*\n\n" .
                                 "Silakan melakukan pembayaran tepat waktu untuk menghindari isolasi jaringan.\n\n" .
-                                "Terima kasih atas kerja samanya. 🙏";
+                                "Terima kasih atas kerja samanya.";
                         } else {
-                            $message = "🚀 *VeloNet Info* \n\n" .
+                            $message = "*VeloNet Info* \n\n" .
                                 "Halo Bapak/Ibu *{$record->name}*,\n" .
                                 "Sekedar menyapa dari VeloNet. Pastikan koneksi internet Anda lancar jaya!\n\n" .
                                 "Jika ada kendala, hubungi kami ya. Terima kasih.";

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Setting;
 use RouterOS\Client;
 use RouterOS\Config;

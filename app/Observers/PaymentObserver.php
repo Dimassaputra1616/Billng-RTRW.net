@@ -26,7 +26,10 @@ class PaymentObserver
 
         // 2. Send WA Receipt to Customer with PDF
         if ($customer) {
-            $amount = number_format($payment->amount_paid, 0, ',', '.');
+            $rawAmount = $payment->amount_paid;
+            $displayAmount = ($rawAmount < 10000) ? $rawAmount * 1000 : $rawAmount;
+            $amount = number_format($displayAmount, 0, ',', '.');
+            
             $number = preg_replace('/[^0-9]/', '', $customer->phone_number);
             if (str_starts_with($number, '0')) {
                 $number = '62' . substr($number, 1);

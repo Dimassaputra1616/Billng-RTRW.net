@@ -65,7 +65,10 @@
 
         <div class="total-box">
             <div class="label">TOTAL DIBAYARKAN</div>
-            <h2>Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}</h2>
+            @php
+                $displayAmount = ($payment->amount_paid < 10000) ? $payment->amount_paid * 1000 : $payment->amount_paid;
+            @endphp
+            <h2>Rp {{ number_format($displayAmount, 0, ',', '.') }}</h2>
         </div>
     </div>
 

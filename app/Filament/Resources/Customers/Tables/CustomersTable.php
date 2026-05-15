@@ -116,7 +116,10 @@ class CustomersTable
                             ->first();
 
                         if ($invoice) {
-                            $amount = number_format($invoice->amount, 0, ',', '.');
+                            $rawAmount = $invoice->amount;
+                            $displayAmount = ($rawAmount < 10000) ? $rawAmount * 1000 : $rawAmount;
+                            $amount = number_format($displayAmount, 0, ',', '.');
+                            
                             $dueDate = $invoice->due_date->format('d M Y');
                             $message = "*VeloNet Billing* \n\n" .
                                 "Halo Bapak/Ibu *{$record->name}*,\n" .

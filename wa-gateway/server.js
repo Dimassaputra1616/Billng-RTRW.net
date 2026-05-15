@@ -86,10 +86,21 @@ app.post('/send-media', async (req, res) => {
         }
 
         console.log(`[WA Gateway] Preparing media for ${formattedNumber}...`);
-        const media = new MessageMedia('application/pdf', file, filename || 'Receipt.pdf');
+        console.log(`[WA Gateway] Base64 length: ${file.length} characters`);
+
+        let media;
+        try {
+            media = new MessageMedia('application/pdf', file, filename || 'Receipt.pdf');
+        } catch (mediaError) {
+            console.error('[WA Gateway] Failed to create MessageMedia object:', mediaError);
+            throw new Error('Invalid media data or format');
+        }
 
         console.log(`[WA Gateway] Sending media to ${formattedNumber}...`);
-        await client.sendMessage(formattedNumber, media, { caption: message });
+        await client.sendMessage(formattedNumber, media, { 
+            caption: message,
+            sendMediaAsDocument: true // Force as document to avoid compression
+        });
 
         console.log(`[WA Gateway] Media sent successfully to ${number}`);
         res.json({

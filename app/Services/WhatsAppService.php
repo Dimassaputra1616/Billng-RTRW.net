@@ -40,7 +40,7 @@ class WhatsAppService
     public static function sendMedia($number, $message, $filename, $base64File)
     {
         try {
-            $response = Http::post('http://localhost:3000/send-media', [
+            $response = Http::timeout(60)->post('http://localhost:3000/send-media', [
                 'number' => $number,
                 'message' => $message,
                 'filename' => $filename,

@@ -51,7 +51,7 @@ class WhatsAppService
                 return true;
             }
 
-            Log::error('WA Gateway Media Error: ' . $response->body());
+            Log::error('WA Gateway Media Error Response: ' . $response->status() . ' - ' . $response->body());
             return false;
         } catch (\Exception $e) {
             Log::error('WA Service Media Exception: ' . $e->getMessage());

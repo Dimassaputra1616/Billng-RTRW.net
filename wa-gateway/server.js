@@ -69,7 +69,10 @@ app.post('/send-message', async (req, res) => {
 app.post('/send-media', async (req, res) => {
     const { number, message, filename, file } = req.body;
 
+    console.log(`[WA Gateway] Incoming media request for ${number} (File: ${filename})`);
+
     if (!number || !file) {
+        console.error('[WA Gateway] Missing number or file!');
         return res.status(400).json({
             status: false,
             message: 'Number and file (base64) are required!'
@@ -82,16 +85,19 @@ app.post('/send-media', async (req, res) => {
             formattedNumber += '@c.us';
         }
 
+        console.log(`[WA Gateway] Preparing media for ${formattedNumber}...`);
         const media = new MessageMedia('application/pdf', file, filename || 'Receipt.pdf');
 
+        console.log(`[WA Gateway] Sending media to ${formattedNumber}...`);
         await client.sendMessage(formattedNumber, media, { caption: message });
 
+        console.log(`[WA Gateway] Media sent successfully to ${number}`);
         res.json({
             status: true,
             message: `Media sent successfully to ${number}`
         });
     } catch (error) {
-        console.error('Error sending media:', error);
+        console.error('[WA Gateway] Error sending media:', error);
         res.status(500).json({
             status: false,
             message: 'Failed to send media',

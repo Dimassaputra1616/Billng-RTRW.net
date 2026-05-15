@@ -49,7 +49,12 @@ class PaymentObserver
                 $filename = "Kwitansi_" . str_replace('/', '_', $invoice->invoice_number) . ".pdf";
 
                 // Send Media
-                \App\Services\WhatsAppService::sendMedia($number, $message, $filename, $base64);
+                $sent = \App\Services\WhatsAppService::sendMedia($number, $message, $filename, $base64);
+                
+                if (!$sent) {
+                    \Log::warning('sendMedia gagal, mencoba sendMessage (fallback)...');
+                    \App\Services\WhatsAppService::sendMessage($number, $message);
+                }
             } catch (\Exception $e) {
                 \Log::error('Gagal kirim PDF Kwitansi: ' . $e->getMessage());
                 // Fallback to text only if PDF fails

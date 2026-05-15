@@ -105,15 +105,35 @@ class CustomersTable
                     ->label('WA')
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('success')
-                    ->tooltip('Kirim WhatsApp via Gateway')
-                    ->form([
-                        \Filament\Forms\Components\Textarea::make('message')
-                            ->label('Isi Pesan')
-                            ->placeholder('Halo, ada yang bisa kami bantu?')
-                            ->required()
-                            ->rows(5),
-                    ])
-                    ->action(function ($record, array $data) {
+                    ->tooltip('Kirim Tagihan Otomatis')
+                    ->requiresConfirmation()
+                    ->modalHeading('Kirim Tagihan via WA')
+                    ->modalDescription('Sistem akan mengirimkan detail tagihan terbaru ke pelanggan ini secara otomatis. Lanjutkan?')
+                    ->action(function ($record) {
+                        $invoice = $record->invoices()
+                            ->where('status', 'unpaid')
+                            ->latest()
+                            ->first();
+
+                        if ($invoice) {
+                            $amount = number_format($invoice->amount, 0, ',', '.');
+                            $dueDate = $invoice->due_date->format('d M Y');
+                            $message = "🚀 *VeloNet Billing* \n\n" .
+                                "Halo Bapak/Ibu *{$record->name}*,\n" .
+                                "Kami informasikan bahwa tagihan internet Anda untuk periode ini sudah terbit.\n\n" .
+                                "📌 *Detail Tagihan:*\n" .
+                                "- Nomor: #{$invoice->invoice_number}\n" .
+                                "- Total: *Rp {$amount}*\n" .
+                                "- Jatuh Tempo: *{$dueDate}*\n\n" .
+                                "Silakan melakukan pembayaran tepat waktu untuk menghindari isolasi jaringan.\n\n" .
+                                "Terima kasih atas kerja samanya. 🙏";
+                        } else {
+                            $message = "🚀 *VeloNet Info* \n\n" .
+                                "Halo Bapak/Ibu *{$record->name}*,\n" .
+                                "Sekedar menyapa dari VeloNet. Pastikan koneksi internet Anda lancar jaya!\n\n" .
+                                "Jika ada kendala, hubungi kami ya. Terima kasih.";
+                        }
+
                         $number = preg_replace('/[^0-9]/', '', $record->phone_number);
                         if (str_starts_with($number, '0')) {
                             $number = '62' . substr($number, 1);
@@ -121,18 +141,18 @@ class CustomersTable
                             $number = '62' . $number;
                         }
 
-                        $sent = \App\Services\WhatsAppService::sendMessage($number, $data['message']);
+                        $sent = \App\Services\WhatsAppService::sendMessage($number, $message);
 
                         if ($sent) {
                             \Filament\Notifications\Notification::make()
-                                ->title('Pesan Terkirim!')
-                                ->body("Pesan WA ke {$record->name} berhasil dikirim via gateway.")
+                                ->title('Tagihan Terkirim!')
+                                ->body("Pesan otomatis berhasil dikirim ke {$record->name}.")
                                 ->success()
                                 ->send();
                         } else {
                             \Filament\Notifications\Notification::make()
-                                ->title('Gagal Kirim WA')
-                                ->body('Pastikan WA Gateway (Node.js) sudah jalan di port 3000.')
+                                ->title('Gagal Kirim')
+                                ->body('Periksa WA Gateway atau log server.')
                                 ->danger()
                                 ->send();
                         }

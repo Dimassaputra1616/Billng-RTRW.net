@@ -105,9 +105,38 @@ class CustomersTable
                     ->label('WA')
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('success')
-                    ->tooltip('Kirim WhatsApp')
-                    ->url(fn ($record) => "https://wa.me/" . preg_replace('/[^0-9]/', '', $record->phone_number))
-                    ->openUrlInNewTab(),
+                    ->tooltip('Kirim WhatsApp via Gateway')
+                    ->form([
+                        \Filament\Forms\Components\Textarea::make('message')
+                            ->label('Isi Pesan')
+                            ->placeholder('Halo, ada yang bisa kami bantu?')
+                            ->required()
+                            ->rows(5),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $number = preg_replace('/[^0-9]/', '', $record->phone_number);
+                        if (str_starts_with($number, '0')) {
+                            $number = '62' . substr($number, 1);
+                        } elseif (str_starts_with($number, '8')) {
+                            $number = '62' . $number;
+                        }
+
+                        $sent = \App\Services\WhatsAppService::sendMessage($number, $data['message']);
+
+                        if ($sent) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Pesan Terkirim!')
+                                ->body("Pesan WA ke {$record->name} berhasil dikirim via gateway.")
+                                ->success()
+                                ->send();
+                        } else {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Gagal Kirim WA')
+                                ->body('Pastikan WA Gateway (Node.js) sudah jalan di port 3000.')
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 \Filament\Actions\EditAction::make(),
             ])
             ->headerActions([

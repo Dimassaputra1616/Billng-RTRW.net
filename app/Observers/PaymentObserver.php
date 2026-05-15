@@ -26,7 +26,7 @@ class PaymentObserver
 
         // 2. Send WA Receipt to Customer
         if ($customer) {
-            $amount = number_format($payment->amount, 0, ',', '.');
+            $amount = number_format($payment->amount_paid, 0, ',', '.');
             $number = preg_replace('/[^0-9]/', '', $customer->phone_number);
             if (str_starts_with($number, '0')) {
                 $number = '62' . substr($number, 1);

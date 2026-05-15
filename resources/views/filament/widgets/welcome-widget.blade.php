@@ -27,7 +27,7 @@
             
             <p class="nb-date-text" style="margin: 16px 0 0 0; font-size: 14px; font-weight: 500;">
                 <x-heroicon-m-calendar class="nb-icon-accent" style="display: inline-block; width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;" />
-                {{ now()->translatedFormat('l, d F Y') }} — <span class="nb-billing-label">Monitoring Billing Pro</span>
+                {{ now()->translatedFormat('l, d F Y') }} — <span class="nb-billing-label">VeloNet Monitoring</span>
             </p>
         </div>
     </div>

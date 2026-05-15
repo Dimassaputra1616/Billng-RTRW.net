@@ -99,6 +99,39 @@ class NetworkTerminal extends Page implements HasForms
         $this->output .= json_encode($results, JSON_PRETTY_PRINT);
     }
 
+    public function runTraceroute(): void
+    {
+        $host = $this->data['ping_host'] ?? null;
+        
+        if (!$host) {
+            Notification::make()->title('Masukkan IP/Host dulu Bang!')->danger()->send();
+            return;
+        }
+
+        $this->output = "Traceroute to $host from Mikrotik...\n";
+        $this->output .= "Hop | Address | Loss | Sent | Last | Avg | Best | Worst\n";
+        $this->output .= "------------------------------------------------------------\n";
+        
+        $service = app(MikrotikService::class);
+        $results = $service->traceroute($host);
+
+        if (isset($results[0]['status']) && $results[0]['status'] === 'error') {
+            $this->output .= "Error: " . $results[0]['message'];
+            return;
+        }
+
+        foreach ($results as $res) {
+            $hop = $res['hop'] ?? '?';
+            $address = $res['address'] ?? 'timeout';
+            $loss = $res['loss'] ?? '0';
+            $last = $res['last'] ?? '0';
+            $avg = $res['avg'] ?? '0';
+            
+            $this->output .= sprintf("%-3s | %-15s | %-4s | %-4s | %-4s | %-4s\n", 
+                $hop, $address, $loss, $res['sent'] ?? '1', $last, $avg);
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -108,6 +141,12 @@ class NetworkTerminal extends Page implements HasForms
                 ->icon('heroicon-o-signal')
                 ->action('runPing'),
             
+            Action::make('traceroute')
+                ->label('Traceroute')
+                ->color('warning')
+                ->icon('heroicon-o-arrows-up-down')
+                ->action('runTraceroute'),
+
             Action::make('execute')
                 ->label('Run Command')
                 ->color('success')

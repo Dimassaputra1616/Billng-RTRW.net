@@ -151,4 +151,22 @@ class MikrotikService
             return [['status' => 'error', 'message' => $e->getMessage()]];
         }
     }
+
+    /**
+     * Traceroute a host from Mikrotik
+     */
+    public function traceroute(string $host): array
+    {
+        $client = $this->connect();
+        if (!$client) return [['status' => 'error', 'message' => 'Koneksi gagal']];
+
+        try {
+            $query = new Query('/tool/traceroute');
+            $query->equal('address', $host);
+            $query->equal('count', '1'); 
+            return $client->query($query)->read();
+        } catch (\Exception $e) {
+            return [['status' => 'error', 'message' => $e->getMessage()]];
+        }
+    }
 }

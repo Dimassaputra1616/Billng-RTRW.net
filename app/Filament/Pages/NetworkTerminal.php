@@ -132,6 +132,27 @@ class NetworkTerminal extends Page implements HasForms
         }
     }
 
+    public function setupRedirect(): void
+    {
+        // Ambil IP server dari request (IP lokal server)
+        $serverIp = request()->server('SERVER_ADDR') ?? $_SERVER['SERVER_ADDR'] ?? '192.168.1.2';
+        
+        $service = app(MikrotikService::class);
+        $success = $service->setupIsolationNAT($serverIp);
+
+        if ($success) {
+            Notification::make()
+                ->title('Redirect Berhasil Dipasang')
+                ->body("Traffic HTTP (Port 80) dari pelanggan ISOLATED sekarang diarahkan ke $serverIp.")
+                ->success()
+                ->send();
+            
+            $this->output .= "NAT Redirect Rule installed successfully to $serverIp:80\n";
+        } else {
+            Notification::make()->title('Gagal pasang NAT Redirect!')->danger()->send();
+        }
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -146,6 +167,15 @@ class NetworkTerminal extends Page implements HasForms
                 ->color('warning')
                 ->icon('heroicon-o-arrows-up-down')
                 ->action('runTraceroute'),
+
+            Action::make('setup_redirect')
+                ->label('Setup Redirect')
+                ->color('danger')
+                ->icon('heroicon-o-arrow-path')
+                ->requiresConfirmation()
+                ->modalHeading('Pasang NAT Redirect?')
+                ->modalDescription('Ini akan otomatis memasang rule NAT di Mikrotik untuk mengalihkan pelanggan yang diisolir ke halaman billing.')
+                ->action('setupRedirect'),
 
             Action::make('execute')
                 ->label('Run Command')

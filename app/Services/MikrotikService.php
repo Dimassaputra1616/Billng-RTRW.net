@@ -181,4 +181,44 @@ class MikrotikService
             return [['status' => 'error', 'message' => $e->getMessage()]];
         }
     }
+
+    /**
+     * Setup NAT redirect for isolated customers
+     */
+    public function setupIsolationNAT(string $serverIp): bool
+    {
+        $client = $this->connect();
+        if (!$client) return false;
+
+        try {
+            // 1. Remove existing redirect if any
+            $queryPrint = new Query('/ip/firewall/nat/print');
+            $queryPrint->where('comment', 'VeloNet Auto-Redirect');
+            $items = $client->query($queryPrint)->read();
+
+            foreach ($items as $item) {
+                $queryRemove = new Query('/ip/firewall/nat/remove');
+                $queryRemove->equal('.id', $item['.id']);
+                $client->query($queryRemove)->read();
+            }
+
+            // 2. Add new NAT Redirect Rule
+            $queryAdd = new Query('/ip/firewall/nat/add');
+            $queryAdd->equal('chain', 'dstnat');
+            $queryAdd->equal('src-address-list', 'ISOLATED');
+            $queryAdd->equal('protocol', 'tcp');
+            $queryAdd->equal('dst-port', '80');
+            $queryAdd->equal('action', 'dst-nat');
+            $queryAdd->equal('to-addresses', $serverIp);
+            $queryAdd->equal('to-ports', '80');
+            $queryAdd->equal('comment', 'VeloNet Auto-Redirect');
+            $queryAdd->equal('place-before', '0'); 
+            $client->query($queryAdd)->read();
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('Mikrotik NAT Setup Error: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

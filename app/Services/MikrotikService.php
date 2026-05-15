@@ -33,45 +33,46 @@ class MikrotikService
     }
 
     /**
-     * Isolate a customer by disabling their PPPoE Secret and removing active session
+     * Isolate a customer by disabling PPPoE or adding IP to address-list
      */
-    public function isolateCustomer(string $pppoe_username): bool
+    public function isolateCustomer(Customer $customer): bool
     {
         $client = $this->connect();
-        
-        if (!$client) {
-            return false;
-        }
+        if (!$client) return false;
 
         try {
-            // 1. Find the secret ID
-            $query = new Query('/ppp/secret/print');
-            $query->where('name', $pppoe_username);
-            $secrets = $client->query($query)->read();
+            // 1. PPPoE Isolation Logic
+            if ($customer->pppoe_username) {
+                $query = new Query('/ppp/secret/print');
+                $query->where('name', $customer->pppoe_username);
+                $secrets = $client->query($query)->read();
 
-            if (empty($secrets)) {
-                return false;
+                if (!empty($secrets)) {
+                    $secretId = $secrets[0]['.id'];
+                    $queryDisable = new Query('/ppp/secret/set');
+                    $queryDisable->equal('.id', $secretId);
+                    $queryDisable->equal('disabled', 'yes');
+                    $client->query($queryDisable)->read();
+
+                    // Remove active session
+                    $queryActive = new Query('/ppp/active/print');
+                    $queryActive->where('name', $customer->pppoe_username);
+                    $activeSessions = $client->query($queryActive)->read();
+                    foreach ($activeSessions as $session) {
+                        $queryRemove = new Query('/ppp/active/remove');
+                        $queryRemove->equal('.id', $session['.id']);
+                        $client->query($queryRemove)->read();
+                    }
+                }
             }
 
-            $secretId = $secrets[0]['.id'];
-
-            // 2. Disable the secret
-            $queryDisable = new Query('/ppp/secret/set');
-            $queryDisable->equal('.id', $secretId);
-            $queryDisable->equal('disabled', 'yes');
-            $client->query($queryDisable)->read();
-
-            // 3. Find and remove active session
-            $queryActive = new Query('/ppp/active/print');
-            $queryActive->where('name', $pppoe_username);
-            $activeSessions = $client->query($queryActive)->read();
-
-            if (!empty($activeSessions)) {
-                foreach ($activeSessions as $session) {
-                    $queryRemove = new Query('/ppp/active/remove');
-                    $queryRemove->equal('.id', $session['.id']);
-                    $client->query($queryRemove)->read();
-                }
+            // 2. IP-based Isolation Logic (Static IP)
+            if ($customer->static_ip) {
+                $queryAdd = new Query('/ip/firewall/address-list/add');
+                $queryAdd->equal('list', 'ISOLATED');
+                $queryAdd->equal('address', $customer->static_ip);
+                $queryAdd->equal('comment', "Isolated: " . $customer->name);
+                $client->query($queryAdd)->read();
             }
 
             return true;
@@ -82,31 +83,42 @@ class MikrotikService
     }
 
     /**
-     * Reactive a customer by enabling their PPPoE Secret
+     * Reactive a customer by enabling PPPoE or removing IP from address-list
      */
-    public function activateCustomer(string $pppoe_username): bool
+    public function activateCustomer(Customer $customer): bool
     {
         $client = $this->connect();
-        
-        if (!$client) {
-            return false;
-        }
+        if (!$client) return false;
 
         try {
-            $query = new Query('/ppp/secret/print');
-            $query->where('name', $pppoe_username);
-            $secrets = $client->query($query)->read();
+            // 1. PPPoE Activation Logic
+            if ($customer->pppoe_username) {
+                $query = new Query('/ppp/secret/print');
+                $query->where('name', $customer->pppoe_username);
+                $secrets = $client->query($query)->read();
 
-            if (empty($secrets)) {
-                return false;
+                if (!empty($secrets)) {
+                    $secretId = $secrets[0]['.id'];
+                    $queryEnable = new Query('/ppp/secret/set');
+                    $queryEnable->equal('.id', $secretId);
+                    $queryEnable->equal('disabled', 'no');
+                    $client->query($queryEnable)->read();
+                }
             }
 
-            $secretId = $secrets[0]['.id'];
+            // 2. IP-based Activation Logic (Static IP)
+            if ($customer->static_ip) {
+                $queryPrint = new Query('/ip/firewall/address-list/print');
+                $queryPrint->where('address', $customer->static_ip);
+                $queryPrint->where('list', 'ISOLATED');
+                $items = $client->query($queryPrint)->read();
 
-            $queryEnable = new Query('/ppp/secret/set');
-            $queryEnable->equal('.id', $secretId);
-            $queryEnable->equal('disabled', 'no');
-            $client->query($queryEnable)->read();
+                foreach ($items as $item) {
+                    $queryRemove = new Query('/ip/firewall/address-list/remove');
+                    $queryRemove->equal('.id', $item['.id']);
+                    $client->query($queryRemove)->read();
+                }
+            }
 
             return true;
         } catch (\Exception $e) {

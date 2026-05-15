@@ -17,7 +17,7 @@ class NetworkTerminal extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-command-line';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-cpu-chip';
 
     protected static ?string $navigationLabel = 'Terminal Mikrotik';
 

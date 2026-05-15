@@ -46,8 +46,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make('Manajemen Pelanggan'),
                 NavigationGroup::make('Keuangan'),
-                NavigationGroup::make('Layanan Network')
-                    ->icon('heroicon-o-command-line'),
+                NavigationGroup::make('Layanan Network'),
                 NavigationGroup::make('Pengaturan')
                     ->collapsed(),
             ])

@@ -17,9 +17,8 @@ use Filament\Tables\Table;
 class InternetPackageResource extends Resource
 {
     protected static ?string $model = InternetPackage::class;
-
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wifi';
     protected static ?string $navigationLabel = 'Paket Internet';
-
     protected static string|\UnitEnum|null $navigationGroup = 'Manajemen Pelanggan';
 
     protected static ?int $navigationSort = 2;
@@ -28,7 +27,6 @@ class InternetPackageResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Paket Internet';
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-signal';
 
     public static function getNavigationBadge(): ?string
     {

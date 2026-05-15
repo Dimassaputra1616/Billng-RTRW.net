@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Setting;
 use RouterOS\Client;
 use RouterOS\Config;
 use RouterOS\Query;
@@ -17,10 +18,10 @@ class MikrotikService
     {
         try {
             $config = new Config([
-                'host' => env('MIKROTIK_HOST', '192.168.1.1'),
-                'user' => env('MIKROTIK_USER', 'admin'),
-                'pass' => env('MIKROTIK_PASS', ''),
-                'port' => (int) env('MIKROTIK_PORT', 8728),
+                'host' => Setting::getValue('mikrotik_host', env('MIKROTIK_HOST', '192.168.1.1')),
+                'user' => Setting::getValue('mikrotik_user', env('MIKROTIK_USER', 'admin')),
+                'pass' => Setting::getValue('mikrotik_pass', env('MIKROTIK_PASS', '')),
+                'port' => (int) Setting::getValue('mikrotik_port', env('MIKROTIK_PORT', 8728)),
                 'timeout' => 5,
             ]);
 
@@ -111,6 +112,43 @@ class MikrotikService
         } catch (\Exception $e) {
             \Log::error('Mikrotik Activation Error: ' . $e->getMessage());
             return false;
+        }
+    }
+
+    /**
+     * Ping a host from Mikrotik
+     */
+    public function ping(string $host): array
+    {
+        $client = $this->connect();
+        if (!$client) return [['status' => 'error', 'message' => 'Koneksi gagal']];
+
+        try {
+            $query = new Query('/ping');
+            $query->equal('address', $host);
+            $query->equal('count', '4');
+            return $client->query($query)->read();
+        } catch (\Exception $e) {
+            return [['status' => 'error', 'message' => $e->getMessage()]];
+        }
+    }
+
+    /**
+     * Execute a raw command on Mikrotik
+     */
+    public function executeRaw(string $command, array $params = []): array
+    {
+        $client = $this->connect();
+        if (!$client) return [['status' => 'error', 'message' => 'Koneksi gagal']];
+
+        try {
+            $query = new Query($command);
+            foreach ($params as $key => $value) {
+                $query->equal($key, $value);
+            }
+            return $client->query($query)->read();
+        } catch (\Exception $e) {
+            return [['status' => 'error', 'message' => $e->getMessage()]];
         }
     }
 }

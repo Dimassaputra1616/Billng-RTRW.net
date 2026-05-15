@@ -44,12 +44,11 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Amber,
             ])
             ->navigationGroups([
-                NavigationGroup::make('Manajemen Pelanggan')
-                    ->icon('heroicon-o-user-group'),
-                NavigationGroup::make('Keuangan')
-                    ->icon('heroicon-o-banknotes'),
+                NavigationGroup::make('Manajemen Pelanggan'),
+                NavigationGroup::make('Keuangan'),
+                NavigationGroup::make('Layanan Network')
+                    ->icon('heroicon-o-command-line'),
                 NavigationGroup::make('Pengaturan')
-                    ->icon('heroicon-o-cog-6-tooth')
                     ->collapsed(),
             ])
             ->renderHook(

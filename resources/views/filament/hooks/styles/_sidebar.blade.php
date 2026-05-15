@@ -10,26 +10,27 @@ aside.fi-sidebar,
     backdrop-filter: blur(10px) !important;
 }
 
-/* Ensure the nav container is also colored if nested and DOES NOT scroll */
+/* Ensure the nav container can scroll if items overflow */
 aside.fi-sidebar nav.fi-sidebar-nav {
     background-color: transparent !important;
-    overflow-y: hidden !important; /* Nonaktifkan scroll di sidebar */
+    overflow-y: auto !important;
+    max-height: calc(100vh - 80px); /* Beri ruang buat footer sidebar */
 }
 
 /* Compact Sidebar Items to fit everything in one screen */
 .fi-sidebar-item {
-    margin-top: 0.15rem !important;
+    margin-top: 0.1rem !important;
 }
 .fi-sidebar-item-btn {
-    padding-top: 0.35rem !important;
-    padding-bottom: 0.35rem !important;
-    min-height: 2.2rem !important;
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+    min-height: 2rem !important;
 }
 .fi-sidebar-group {
-    margin-top: 0.75rem !important;
+    margin-top: 0.4rem !important;
 }
 .fi-sidebar-group-label {
-    margin-bottom: 0.25rem !important;
+    margin-bottom: 0.15rem !important;
 }
 
 /* Hide Scrollbar for Sidebar completely */
@@ -94,4 +95,28 @@ html body .fi-sidebar li:not(.fi-active) > a.fi-sidebar-item-btn:hover .fi-sideb
     letter-spacing: 0.05em;
     text-transform: uppercase;
     font-size: 0.65rem !important;
+}
+
+/* ══════════════════════════════
+   Sidebar Sub-menu Consistency Fix
+   ══════════════════════════════ */
+/* Force sub-item icons to show and hide indicators */
+.fi-sidebar-item-icon {
+    display: flex !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.fi-sidebar-item-indicator {
+    display: none !important;
+}
+
+/* Ensure the container doesn't have extra left padding that pushes icons */
+.fi-sidebar-group-items {
+    padding-left: 0.5rem !important;
+    border-left: none !important;
+}
+
+.fi-sidebar-group-items::before {
+    display: none !important;
 }

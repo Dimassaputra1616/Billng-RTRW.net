@@ -32,6 +32,8 @@ class WhatsAppService
             Log::error('WA Service Exception: ' . $e->getMessage());
             return false;
         }
+    }
+
     /**
      * Kirim media WhatsApp melalui Gateway Node.js
      */

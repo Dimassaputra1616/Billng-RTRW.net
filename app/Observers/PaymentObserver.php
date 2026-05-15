@@ -24,7 +24,7 @@ class PaymentObserver
             }
         }
 
-        // 2. Send WA Receipt to Customer
+        // 2. Send WA Receipt to Customer with PDF
         if ($customer) {
             $amount = number_format($payment->amount_paid, 0, ',', '.');
             $number = preg_replace('/[^0-9]/', '', $customer->phone_number);
@@ -39,9 +39,22 @@ class PaymentObserver
                 "Pembayaran untuk tagihan #{$invoice->invoice_number} sebesar *Rp {$amount}* telah kami terima.\n\n" .
                 "Status: *LUNAS*\n" .
                 "Tanggal: " . now()->format('d/m/Y H:i') . "\n\n" .
+                "Kwitansi digital telah kami lampirkan pada pesan ini.\n" .
                 "Terima kasih telah berlangganan VeloNet.";
 
-            \App\Services\WhatsAppService::sendMessage($number, $message);
+            try {
+                // Generate PDF
+                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.receipt', ['payment' => $payment]);
+                $base64 = base64_encode($pdf->output());
+                $filename = "Kwitansi_" . str_replace('/', '_', $invoice->invoice_number) . ".pdf";
+
+                // Send Media
+                \App\Services\WhatsAppService::sendMedia($number, $message, $filename, $base64);
+            } catch (\Exception $e) {
+                \Log::error('Gagal kirim PDF Kwitansi: ' . $e->getMessage());
+                // Fallback to text only if PDF fails
+                \App\Services\WhatsAppService::sendMessage($number, $message);
+            }
         }
     }
 

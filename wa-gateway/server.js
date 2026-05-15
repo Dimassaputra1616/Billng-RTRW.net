@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
 const cors = require('cors');
@@ -59,6 +59,41 @@ app.post('/send-message', async (req, res) => {
         res.status(500).json({
             status: false,
             message: 'Failed to send message',
+            error: error.message
+        });
+    }
+});
+
+// Endpoint untuk kirim media (PDF/Gambar)
+app.post('/send-media', async (req, res) => {
+    const { number, message, filename, file } = req.body;
+
+    if (!number || !file) {
+        return res.status(400).json({
+            status: false,
+            message: 'Number and file (base64) are required!'
+        });
+    }
+
+    try {
+        let formattedNumber = number.replace(/\D/g, '');
+        if (!formattedNumber.endsWith('@c.us')) {
+            formattedNumber += '@c.us';
+        }
+
+        const media = new MessageMedia('application/pdf', file, filename || 'Receipt.pdf');
+
+        await client.sendMessage(formattedNumber, media, { caption: message });
+
+        res.json({
+            status: true,
+            message: `Media sent successfully to ${number}`
+        });
+    } catch (error) {
+        console.error('Error sending media:', error);
+        res.status(500).json({
+            status: false,
+            message: 'Failed to send media',
             error: error.message
         });
     }

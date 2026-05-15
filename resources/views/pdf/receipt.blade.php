@@ -1,227 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kwitansi Pembayaran</title>
+    <meta charset="utf-8">
+    <title>Kwitansi Pembayaran #{{ $payment->id }}</title>
     <style>
-        /* General Setup */
-        @page {
-            margin: 0.5cm;
-        }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 12px;
-            color: #333;
-            line-height: 1.4;
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* Watermark LUNAS */
-        .watermark {
-            position: fixed;
-            top: 40%;
-            left: 25%;
-            transform: rotate(-35deg);
-            opacity: 0.15;
-            color: #10b981; /* Green color */
-            font-size: 100px;
-            font-weight: bold;
-            z-index: -1;
-            text-align: center;
-            width: 100%;
-        }
-
-        /* Header Layout */
-        .header-table {
-            width: 100%;
-            border-bottom: 2px solid #1e1b4b;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-        .company-info h1 {
-            font-size: 20px;
-            color: #1e1b4b;
-            margin: 0;
-            text-transform: uppercase;
-        }
-        .company-info p {
-            margin: 2px 0;
-            color: #666;
-            font-size: 10px;
-        }
-        .receipt-title {
-            text-align: right;
-            vertical-align: top;
-        }
-        .receipt-title h2 {
-            font-size: 24px;
-            color: #1e1b4b;
-            margin: 0;
-            letter-spacing: 2px;
-        }
-        .receipt-title p {
-            margin: 2px 0;
-            font-weight: bold;
-        }
-
-        /* Customer Box */
-        .info-section {
-            margin-bottom: 30px;
-        }
-        .customer-box {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            width: 60%;
-            border-radius: 4px;
-        }
-        .customer-box h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .customer-box p {
-            margin: 3px 0;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .payment-method {
-            margin-top: 5px;
-            font-size: 11px;
-            color: #1e1b4b;
-        }
-
-        /* Items Table */
-        .items-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        .items-table th {
-            background-color: #1e1b4b;
-            color: white;
-            text-align: left;
-            padding: 10px;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-        .items-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .description-col {
-            width: 70%;
-        }
-        .price-col {
-            width: 30%;
-            text-align: right;
-            font-weight: bold;
-        }
-
-        /* Total Section */
-        .total-container {
-            float: right;
-            width: 40%;
-        }
-        .total-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .total-table td {
-            padding: 5px 10px;
-        }
-        .total-label {
-            text-align: right;
-            color: #64748b;
-            font-weight: bold;
-        }
-        .total-value {
-            text-align: right;
-            font-size: 16px;
-            color: #1e1b4b;
-            font-weight: bold;
-        }
-
-        /* Footer */
-        .footer {
-            clear: both;
-            margin-top: 100px;
-            text-align: center;
-            font-size: 10px;
-            color: #94a3b8;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 15px;
-        }
+        body { font-family: 'Helvetica', sans-serif; color: #333; line-height: 1.5; }
+        .header { text-align: center; border-bottom: 2px solid #5d5fef; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; color: #5d5fef; text-transform: uppercase; letter-spacing: 2px; }
+        .header p { margin: 5px 0 0; color: #666; font-size: 14px; }
+        .info-table { width: 100%; margin-bottom: 30px; }
+        .info-table td { padding: 5px 0; vertical-align: top; }
+        .label { color: #888; font-size: 12px; text-transform: uppercase; font-weight: bold; }
+        .value { color: #333; font-size: 15px; font-weight: bold; }
+        .receipt-body { background: #f9f9f9; padding: 30px; border-radius: 10px; border: 1px solid #eee; }
+        .total-box { margin-top: 30px; text-align: right; border-top: 2px dashed #ddd; padding-top: 20px; }
+        .total-box h2 { margin: 0; color: #5d5fef; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #aaa; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,255,0,0.05); font-weight: bold; z-index: -1; }
     </style>
 </head>
 <body>
     <div class="watermark">LUNAS</div>
 
-    <table class="header-table">
-        <tr>
-            <td class="company-info">
-                <!-- <img src="path_to_logo.png" style="height: 50px; margin-bottom: 10px;"> -->
-                <h1>RT RW NET PRO</h1>
-                <p>Jl. Pahlawan No. 123, Kota Digital</p>
-                <p>WhatsApp: 0812-3456-7890 | Email: support@rtrwnet.pro</p>
-            </td>
-            <td class="receipt-title">
-                <h2>KWITANSI</h2>
-                <p>#{{ $payment->invoice->invoice_number }}</p>
-                <p style="font-weight: normal; font-size: 11px; color: #64748b;">Tanggal Bayar: {{ $payment->payment_date->format('d/m/Y') }}</p>
-            </td>
-        </tr>
-    </table>
+    <div class="header">
+        <h1>VeloNet</h1>
+        <p>Solusi Internet Cepat & Stabil</p>
+        <p>RT RW NET Management System</p>
+    </div>
 
-    <div class="info-section">
-        <div class="customer-box">
-            <h3>Tagihan Kepada:</h3>
-            <p>{{ $payment->invoice->customer->name }}</p>
-            <div class="payment-method">
-                Metode Pembayaran: <strong>{{ strtoupper($payment->payment_method) }}</strong>
-            </div>
+    <div class="receipt-body">
+        <table class="info-table">
+            <tr>
+                <td width="50%">
+                    <div class="label">DITERIMA DARI</div>
+                    <div class="value">{{ $payment->customer->name }}</div>
+                </td>
+                <td width="50%" style="text-align: right;">
+                    <div class="label">NOMOR KWITANSI</div>
+                    <div class="value">#REC-{{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <div class="label">UNTUK PEMBAYARAN</div>
+                    <div class="value">Tagihan #{{ $payment->invoice->invoice_number }}</div>
+                    <div class="value">Periode {{ $payment->invoice->period_month }}/{{ $payment->invoice->period_year }}</div>
+                </td>
+                <td width="50%" style="text-align: right;">
+                    <div class="label">TANGGAL BAYAR</div>
+                    <div class="value">{{ $payment->payment_date->format('d F Y H:i') }}</div>
+                </td>
+            </tr>
+            <tr>
+                <td width="50%">
+                    <div class="label">METODE PEMBAYARAN</div>
+                    <div class="value">{{ strtoupper($payment->payment_method) }}</div>
+                </td>
+                <td width="50%" style="text-align: right;">
+                    <div class="label">STATUS</div>
+                    <div class="value" style="color: green;">LUNAS</div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="total-box">
+            <div class="label">TOTAL DIBAYARKAN</div>
+            <h2>Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}</h2>
         </div>
     </div>
 
-    <table class="items-table">
-        <thead>
-            <tr>
-                <th class="description-col">Deskripsi</th>
-                <th class="price-col">Total Harga</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td class="description-col">
-                    @php
-                        $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                    @endphp
-                    Pembayaran {{ $payment->invoice->customer->internetPackage->name }} <br>
-                    <small style="color: #64748b;">Periode {{ $bulan[$payment->invoice->period_month] }} {{ $payment->invoice->period_year }}</small>
-                </td>
-                <td class="price-col">
-                    Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <div class="total-container">
-        <table class="total-table">
-            <tr>
-                <td class="total-label">TOTAL BAYAR</td>
-                <td class="total-value">Rp {{ number_format($payment->amount_paid, 0, ',', '.') }}</td>
-            </tr>
-        </table>
-    </div>
-
     <div class="footer">
-        <p>Terima kasih telah berlangganan layanan <strong>RT RW NET PRO</strong>.</p>
-        <p>Bukti pembayaran ini sah dan diterbitkan secara otomatis oleh sistem.</p>
-        <p style="margin-top: 5px;">Dicetak pada: {{ now()->format('d/m/Y H:i:s') }}</p>
+        <p>Kwitansi ini diterbitkan secara otomatis oleh sistem VeloNet dan merupakan bukti pembayaran yang sah.</p>
+        <p>&copy; {{ date('Y') }} VeloNet RT RW Net</p>
     </div>
 </body>
 </html>

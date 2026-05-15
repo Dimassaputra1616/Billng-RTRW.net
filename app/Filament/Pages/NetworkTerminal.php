@@ -53,6 +53,11 @@ class NetworkTerminal extends Page implements HasForms
                                 ->label('Raw Command (API Path)')
                                 ->placeholder('/ip/address/print')
                                 ->hint('Masukkan path API Mikrotik.'),
+
+                            TextInput::make('server_ip')
+                                ->label('IP Server Billing (Halaman Isolir)')
+                                ->placeholder('10.62.38.208')
+                                ->hint('IP ini digunakan untuk redirect pelanggan yang diisolir.'),
                         ]),
                 ])->statePath('data'),
         ];
@@ -134,8 +139,8 @@ class NetworkTerminal extends Page implements HasForms
 
     public function setupRedirect(): void
     {
-        // Ambil IP server dari request (IP lokal server)
-        $serverIp = request()->server('SERVER_ADDR') ?? $_SERVER['SERVER_ADDR'] ?? '192.168.1.2';
+        // Ambil IP server dari input, kalau kosong baru dari server env
+        $serverIp = $this->data['server_ip'] ?? request()->server('SERVER_ADDR') ?? $_SERVER['SERVER_ADDR'] ?? '10.62.38.208';
         
         $service = app(MikrotikService::class);
         $success = $service->setupIsolationNAT($serverIp);

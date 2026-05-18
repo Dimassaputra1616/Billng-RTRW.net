@@ -48,19 +48,19 @@ class NetworkTerminal extends Page implements HasForms
                                 ->placeholder('8.8.8.8')
                                 ->default('8.8.8.8')
                                 ->required()
-                                ->hint('Tekan tombol Ping untuk mengetes koneksi.'),
+                                ->helperText('Untuk mengetes koneksi.'),
                             
                             TextInput::make('raw_command')
-                                ->label('Raw Command (API Path)')
+                                ->label('Raw Command')
                                 ->placeholder('/ip/address/print')
                                 ->default('/ip/address/print')
-                                ->hint('Masukkan path API Mikrotik.'),
+                                ->helperText('Masukkan path API Mikrotik.'),
 
                             TextInput::make('server_ip')
-                                ->label('IP Server Billing (Halaman Isolir)')
+                                ->label('IP Server Billing')
                                 ->placeholder('10.62.38.208')
                                 ->default('10.62.38.208')
-                                ->hint('IP ini digunakan untuk redirect pelanggan yang diisolir.'),
+                                ->helperText('Untuk redirect halaman isolir.'),
                         ]),
                 ])->statePath('data'),
         ];

@@ -19,7 +19,7 @@ class PaymentObserver
         // 1. Sync to Mikrotik if isolated
         if ($customer && $customer->status === 'isolated') {
             $mikrotik = app(\App\Services\MikrotikService::class);
-            if ($mikrotik->activateCustomer($customer->pppoe_username)) {
+            if ($mikrotik->activateCustomer($customer)) {
                 $customer->update(['status' => 'active']);
             }
         }

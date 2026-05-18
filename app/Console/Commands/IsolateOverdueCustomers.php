@@ -61,7 +61,7 @@ class IsolateOverdueCustomers extends Command
             }
 
             // a. Isolate on Mikrotik
-            $isolated = $mikrotik->isolateCustomer($customer->pppoe_username);
+            $isolated = $mikrotik->isolateCustomer($customer);
 
             if ($isolated) {
                 // b. Update status in database

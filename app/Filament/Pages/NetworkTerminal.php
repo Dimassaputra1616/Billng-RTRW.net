@@ -41,22 +41,25 @@ class NetworkTerminal extends Page implements HasForms
             Section::make('Mikrotik Command Center')
                 ->description('Eksekusi perintah ping atau CLI langsung ke router.')
                 ->schema([
-                    Grid::make(2)
+                    Grid::make(3)
                         ->schema([
                             TextInput::make('ping_host')
                                 ->label('Ping Host / IP')
                                 ->placeholder('8.8.8.8')
+                                ->default('8.8.8.8')
                                 ->required()
                                 ->hint('Tekan tombol Ping untuk mengetes koneksi.'),
                             
                             TextInput::make('raw_command')
                                 ->label('Raw Command (API Path)')
                                 ->placeholder('/ip/address/print')
+                                ->default('/ip/address/print')
                                 ->hint('Masukkan path API Mikrotik.'),
 
                             TextInput::make('server_ip')
                                 ->label('IP Server Billing (Halaman Isolir)')
                                 ->placeholder('10.62.38.208')
+                                ->default('10.62.38.208')
                                 ->hint('IP ini digunakan untuk redirect pelanggan yang diisolir.'),
                         ]),
                 ])->statePath('data'),
@@ -65,16 +68,17 @@ class NetworkTerminal extends Page implements HasForms
 
     public function runPing(): void
     {
-        $host = $this->data['ping_host'] ?? null;
-        
-        if (!$host) {
-            Notification::make()->title('Masukkan IP/Host dulu Bang!')->danger()->send();
-            return;
-        }
+        $host = $this->data['ping_host'] ?? '8.8.8.8';
 
         $this->output = "Pinging $host from Mikrotik...\n";
         
         $service = app(MikrotikService::class);
+        $isSimulated = $service->isSimulationMode();
+        
+        if ($isSimulated) {
+            $this->output = "[SIMULASI - TIDAK ADA KONEKSI ROUTER]\n" . $this->output;
+        }
+        
         $results = $service->ping($host);
 
         if (isset($results[0]['status']) && $results[0]['status'] === 'error') {
@@ -89,16 +93,17 @@ class NetworkTerminal extends Page implements HasForms
 
     public function runCommand(): void
     {
-        $cmd = $this->data['raw_command'] ?? null;
-
-        if (!$cmd) {
-            Notification::make()->title('Masukkan Perintah API dulu Bang!')->danger()->send();
-            return;
-        }
+        $cmd = $this->data['raw_command'] ?? '/ip/address/print';
 
         $this->output = "Executing $cmd...\n";
 
         $service = app(MikrotikService::class);
+        $isSimulated = $service->isSimulationMode();
+        
+        if ($isSimulated) {
+            $this->output = "[SIMULASI - TIDAK ADA KONEKSI ROUTER]\n" . $this->output;
+        }
+        
         $results = $service->executeRaw($cmd);
 
         $this->output .= json_encode($results, JSON_PRETTY_PRINT);
@@ -106,18 +111,19 @@ class NetworkTerminal extends Page implements HasForms
 
     public function runTraceroute(): void
     {
-        $host = $this->data['ping_host'] ?? null;
-        
-        if (!$host) {
-            Notification::make()->title('Masukkan IP/Host dulu Bang!')->danger()->send();
-            return;
-        }
+        $host = $this->data['ping_host'] ?? '8.8.8.8';
 
         $this->output = "Traceroute to $host from Mikrotik...\n";
-        $this->output .= "Hop | Address | Loss | Sent | Last | Avg | Best | Worst\n";
+        $this->output .= "Hop | Address         | Loss | Sent | Last | Avg\n";
         $this->output .= "------------------------------------------------------------\n";
         
         $service = app(MikrotikService::class);
+        $isSimulated = $service->isSimulationMode();
+        
+        if ($isSimulated) {
+            $this->output = "[SIMULASI - TIDAK ADA KONEKSI ROUTER]\n" . $this->output;
+        }
+        
         $results = $service->traceroute($host);
 
         if (isset($results[0]['status']) && $results[0]['status'] === 'error') {
@@ -139,20 +145,21 @@ class NetworkTerminal extends Page implements HasForms
 
     public function setupRedirect(): void
     {
-        // Ambil IP server dari input, kalau kosong baru dari server env
         $serverIp = $this->data['server_ip'] ?? request()->server('SERVER_ADDR') ?? $_SERVER['SERVER_ADDR'] ?? '10.62.38.208';
         
         $service = app(MikrotikService::class);
+        $isSimulated = $service->isSimulationMode();
         $success = $service->setupIsolationNAT($serverIp);
 
         if ($success) {
             Notification::make()
-                ->title('Redirect Berhasil Dipasang')
+                ->title($isSimulated ? 'Redirect Berhasil (Simulasi)' : 'Redirect Berhasil Dipasang')
                 ->body("Traffic HTTP (Port 80) dari pelanggan ISOLATED sekarang diarahkan ke $serverIp.")
                 ->success()
                 ->send();
             
-            $this->output .= "NAT Redirect Rule installed successfully to $serverIp:80\n";
+            $this->output = ($isSimulated ? "[SIMULASI - TIDAK ADA KONEKSI ROUTER]\n" : "") . 
+                "NAT Redirect Rule installed successfully to $serverIp:80\n";
         } else {
             Notification::make()->title('Gagal pasang NAT Redirect!')->danger()->send();
         }

@@ -322,14 +322,21 @@ class MikrotikService
                 $client->query($queryFilterRemove)->read();
             }
 
-            // 2. Tambah rule filter baru di urutan paling atas (place-before = 0)
+            // Cek apakah ada rule filter lain yang tersisa di router
+            $checkFilterPrint = new Query('/ip/firewall/filter/print');
+            $remainingFilterItems = $client->query($checkFilterPrint)->read();
+            $hasFilterRules = !empty($remainingFilterItems);
+
+            // 2. Tambah rule filter baru
             $queryFilterAdd = new Query('/ip/firewall/filter/add');
             $queryFilterAdd->equal('chain', 'forward');
             $queryFilterAdd->equal('src-address-list', 'ISOLATED');
             $queryFilterAdd->equal('dst-address', '!' . $serverIp);
             $queryFilterAdd->equal('action', 'drop');
             $queryFilterAdd->equal('comment', 'VeloNet Auto-Block');
-            $queryFilterAdd->equal('place-before', '0'); 
+            if ($hasFilterRules) {
+                $queryFilterAdd->equal('place-before', '0'); 
+            }
             $client->query($queryFilterAdd)->read();
 
             // B. FIREWALL NAT RULE (Redirect Port 80 ke Halaman Isolir)
@@ -344,7 +351,12 @@ class MikrotikService
                 $client->query($queryRemove)->read();
             }
 
-            // 2. Tambah rule NAT baru di urutan paling atas (place-before = 0)
+            // Cek apakah ada rule NAT lain yang tersisa di router
+            $checkNatPrint = new Query('/ip/firewall/nat/print');
+            $remainingNatItems = $client->query($checkNatPrint)->read();
+            $hasNatRules = !empty($remainingNatItems);
+
+            // 2. Tambah rule NAT baru
             $queryAdd = new Query('/ip/firewall/nat/add');
             $queryAdd->equal('chain', 'dstnat');
             $queryAdd->equal('src-address-list', 'ISOLATED');
@@ -354,7 +366,9 @@ class MikrotikService
             $queryAdd->equal('to-addresses', $serverIp);
             $queryAdd->equal('to-ports', '80');
             $queryAdd->equal('comment', 'VeloNet Auto-Redirect');
-            $queryAdd->equal('place-before', '0'); 
+            if ($hasNatRules) {
+                $queryAdd->equal('place-before', '0'); 
+            }
             $client->query($queryAdd)->read();
 
             return true;
